@@ -66,6 +66,21 @@ def add_complaint():
     conn.close()
     return jsonify({"message": "Complaint submitted successfully!"}), 201
 
+@app.route('/complaints/open', methods=['GET'])
+def get_open_complaints():
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("SELECT id, name, email, complaint, status, created_at FROM complaints WHERE status='Open' ORDER BY created_at DESC")
+    rows = cur.fetchall()
+    cur.close()
+    conn.close()
+    complaints = [
+        {"id": r[0], "name": r[1], "email": r[2],
+         "complaint": r[3], "status": r[4], "created_at": str(r[5])}
+        for r in rows
+    ]
+    return jsonify(complaints)
+
 if __name__ == '__main__':
     init_db()
     app.run(host='0.0.0.0', port=5000, debug=True)
