@@ -29,6 +29,16 @@ def init_db():
     cur.close()
     conn.close()
 
+db_initialized = False
+def ensure_db():
+    global db_initialized
+    if not db_initialized:
+        try:
+            init_db()
+            db_initialized = True
+        except Exception as e:
+            print(f"Database not ready yet: {e}")
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -37,8 +47,25 @@ def index():
 def health():
     return jsonify({"status": "healthy"}), 200
 
+@app.route('/complaints/open', methods=['GET'])
+def get_open_complaints():
+    ensure_db()
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("SELECT id, name, email, complaint, status, created_at FROM complaints WHERE status = 'Open' ORDER BY created_at DESC")
+    rows = cur.fetchall()
+    cur.close()
+    conn.close()
+    complaints = [
+        {"id": r[0], "name": r[1], "email": r[2],
+         "complaint": r[3], "status": r[4], "created_at": str(r[5])}
+        for r in rows
+    ]
+    return jsonify(complaints)
+
 @app.route('/complaints', methods=['GET'])
 def get_complaints():
+    ensure_db()
     conn = get_db()
     cur = conn.cursor()
     cur.execute("SELECT id, name, email, complaint, status, created_at FROM complaints ORDER BY created_at DESC")
@@ -54,6 +81,7 @@ def get_complaints():
 
 @app.route('/complaints', methods=['POST'])
 def add_complaint():
+    ensure_db()
     data = request.json
     conn = get_db()
     cur = conn.cursor()
@@ -67,5 +95,5 @@ def add_complaint():
     return jsonify({"message": "Complaint submitted successfully!"}), 201
 
 if __name__ == '__main__':
-    init_db()
+    ensure_db()
     app.run(host='0.0.0.0', port=5000, debug=True)
