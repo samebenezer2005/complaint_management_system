@@ -66,6 +66,14 @@ kubectl apply -f k8s/
 minikube service flask-app-service -n complaint-app --url
 ```
 
+### Run with Terraform
+```bash
+cd terraform
+terraform init
+terraform apply -auto-approve
+```
+Wait a few seconds, then access the app at `http://localhost:5001`
+
 ## 🔄 CI/CD Pipeline
 
 The GitHub Actions pipeline automatically:
