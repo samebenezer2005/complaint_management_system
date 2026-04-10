@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: flask-app
-          image: complaint-management-system:v2
+          image: complaint-management-system:v3
           imagePullPolicy: Never  # Use local Minikube image
           ports:
             - containerPort: 5000

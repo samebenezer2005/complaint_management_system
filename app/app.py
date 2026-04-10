@@ -25,6 +25,8 @@ def init_db():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
+    cur.execute("ALTER TABLE complaints ADD COLUMN IF NOT EXISTS category VARCHAR(100) DEFAULT 'General'")
+    cur.execute("ALTER TABLE complaints ADD COLUMN IF NOT EXISTS priority VARCHAR(50) DEFAULT 'Medium'")
     conn.commit()
     cur.close()
     conn.close()
@@ -52,13 +54,13 @@ def get_open_complaints():
     ensure_db()
     conn = get_db()
     cur = conn.cursor()
-    cur.execute("SELECT id, name, email, complaint, status, created_at FROM complaints WHERE status = 'Open' ORDER BY created_at DESC")
+    cur.execute("SELECT id, name, email, complaint, status, created_at, category, priority FROM complaints WHERE status = 'Open' ORDER BY created_at DESC")
     rows = cur.fetchall()
     cur.close()
     conn.close()
     complaints = [
         {"id": r[0], "name": r[1], "email": r[2],
-         "complaint": r[3], "status": r[4], "created_at": str(r[5])}
+         "complaint": r[3], "status": r[4], "created_at": str(r[5]), "category": r[6], "priority": r[7]}
         for r in rows
     ]
     return jsonify(complaints)
@@ -68,13 +70,13 @@ def get_complaints():
     ensure_db()
     conn = get_db()
     cur = conn.cursor()
-    cur.execute("SELECT id, name, email, complaint, status, created_at FROM complaints ORDER BY created_at DESC")
+    cur.execute("SELECT id, name, email, complaint, status, created_at, category, priority FROM complaints ORDER BY created_at DESC")
     rows = cur.fetchall()
     cur.close()
     conn.close()
     complaints = [
         {"id": r[0], "name": r[1], "email": r[2],
-         "complaint": r[3], "status": r[4], "created_at": str(r[5])}
+         "complaint": r[3], "status": r[4], "created_at": str(r[5]), "category": r[6], "priority": r[7]}
         for r in rows
     ]
     return jsonify(complaints)
@@ -85,9 +87,11 @@ def add_complaint():
     data = request.json
     conn = get_db()
     cur = conn.cursor()
+    category = data.get('category', 'General')
+    priority = data.get('priority', 'Medium')
     cur.execute(
-        "INSERT INTO complaints (name, email, complaint) VALUES (%s, %s, %s)",
-        (data['name'], data['email'], data['complaint'])
+        "INSERT INTO complaints (name, email, complaint, category, priority) VALUES (%s, %s, %s, %s, %s)",
+        (data['name'], data['email'], data['complaint'], category, priority)
     )
     conn.commit()
     cur.close()
