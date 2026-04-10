@@ -58,10 +58,8 @@ resource "docker_container" "postgres" {
 
 # --- Flask Application ---
 resource "docker_image" "flask_app" {
-  name = "complaint-management-system:latest"
-  build {
-    context = "${path.module}/.."
-  }
+  name         = "complaint-management-system:latest"
+  keep_locally = true
 }
 
 resource "docker_container" "flask_app" {
