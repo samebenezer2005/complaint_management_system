@@ -61,7 +61,9 @@ Access the app at `http://localhost:5000`
 minikube start
 kubectl apply -f k8s/namespace.yml
 kubectl apply -f k8s/
-kubectl port-forward -n complaint-app svc/flask-app-service 5000:5000
+
+# Get the URL to access the application
+minikube service flask-app-service -n complaint-app --url
 ```
 
 ## 🔄 CI/CD Pipeline
@@ -73,12 +75,13 @@ The GitHub Actions pipeline automatically:
 
 ## 📊 API Endpoints
 
-| Method | Endpoint      | Description            |
-|--------|---------------|------------------------|
-| GET    | `/`           | Web UI                 |
-| GET    | `/health`     | Health check           |
-| GET    | `/complaints` | List all complaints    |
-| POST   | `/complaints` | Submit a new complaint |
+| Method | Endpoint             | Description              |
+|--------|----------------------|--------------------------|
+| GET    | `/`                  | Web UI                   |
+| GET    | `/health`            | Health check             |
+| GET    | `/complaints`        | List all complaints      |
+| GET    | `/complaints/open`   | List Open status only    |
+| POST   | `/complaints`        | Submit a new complaint   |
 
 ## 🧪 Running Tests
 ```bash
